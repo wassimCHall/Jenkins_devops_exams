@@ -55,6 +55,7 @@ pipeline {
                     --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
+                    --set ingress.host=dev.app.local \
                     -n dev
                 '''
             }
@@ -68,6 +69,7 @@ pipeline {
                     --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
+                    --set ingress.host=qa.app.local \
                     -n qa
                 '''
             }
@@ -81,6 +83,7 @@ pipeline {
                     --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
+                    --set ingress.host=staging.app.local \
                     -n staging
                 '''
             }
@@ -95,6 +98,7 @@ pipeline {
                     --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
+                    --set ingress.host=app.local \
                     -n prod
                 '''
             }
