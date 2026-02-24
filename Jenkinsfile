@@ -11,44 +11,28 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: "${env.BRANCH_NAME}",
-                url: 'https://github.com/wassimCHall/Jenkins_devops_exams'
+                checkout scm
             }
         }
 
         stage('Build Images') {
             steps {
-                sh 'docker build -t $IMAGE_MOVIE:${BUILD_NUMBER} movie-service/'
-                sh 'docker build -t $IMAGE_CAST:${BUILD_NUMBER} cast-service/'
+                sh 'docker build -t $IMAGE_MOVIE:${BUILD_NUMBER} app/movie-service/'
+                sh 'docker build -t $IMAGE_CAST:${BUILD_NUMBER} app/cast-service/'
             }
         }
 
         stage('Push Images') {
             steps {
-                sh 'docker login -u $DOCKERHUB_CREDS_USR -p $DOCKERHUB_CREDS_PSW'
+                sh 'echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin'
                 sh 'docker push $IMAGE_MOVIE:${BUILD_NUMBER}'
                 sh 'docker push $IMAGE_CAST:${BUILD_NUMBER}'
             }
         }
 
         stage('Deploy Dev') {
-            when { branch 'dev' }
             steps {
                 sh 'helm upgrade --install app ./app/charts -n dev'
-            }
-        }
-
-        stage('Deploy QA') {
-            when { branch 'qa' }
-            steps {
-                sh 'helm upgrade --install app ./app/charts -n qa'
-            }
-        }
-
-        stage('Deploy Staging') {
-            when { branch 'staging' }
-            steps {
-                sh 'helm upgrade --install app ./app/charts -n staging'
             }
         }
 
