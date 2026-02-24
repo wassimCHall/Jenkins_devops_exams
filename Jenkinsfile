@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDS = credentials('dockerhub')
+        DOCKERHUB_CREDS = credentials('DOCKER_HUB_PASS')
         IMAGE_MOVIE = "welchallch/movie-service"
         IMAGE_CAST  = "welchallch/cast-service"
         IMAGE_TAG   = "1.2"
