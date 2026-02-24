@@ -10,6 +10,7 @@ pipeline {
         DOCKER_IMAGE_MOVIE = "welchallch/movie-service"
         DOCKER_IMAGE_CAST  = "welchallch/cast-service"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
+        KUBECONFIG = "/etc/rancher/k3s/k3s.yaml"
     }
 
     stages {
