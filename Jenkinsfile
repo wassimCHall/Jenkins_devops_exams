@@ -19,8 +19,8 @@ pipeline {
         stage('Build Images') {
             steps {
                 sh """
-                docker build -t $IMAGE_MOVIE:$IMAGE_TAG app/movie-service/
-                docker build -t $IMAGE_CAST:$IMAGE_TAG app/cast-service/
+                docker build -t $IMAGE_MOVIE:$IMAGE_TAG movie-service/
+                docker build -t $IMAGE_CAST:$IMAGE_TAG cast-service/
                 """
             }
         }
