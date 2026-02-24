@@ -4,7 +4,8 @@ pipeline {
     environment {
         DOCKERHUB_CREDS = credentials('dockerhub')
         IMAGE_MOVIE = "welchallch/movie-service"
-        IMAGE_CAST = "welchallch/cast-service"
+        IMAGE_CAST  = "welchallch/cast-service"
+        IMAGE_TAG   = "1.2"
     }
 
     stages {
@@ -17,22 +18,31 @@ pipeline {
 
         stage('Build Images') {
             steps {
-                sh 'docker build -t $IMAGE_MOVIE:${BUILD_NUMBER} app/movie-service/'
-                sh 'docker build -t $IMAGE_CAST:${BUILD_NUMBER} app/cast-service/'
+                sh """
+                docker build -t $IMAGE_MOVIE:$IMAGE_TAG app/movie-service/
+                docker build -t $IMAGE_CAST:$IMAGE_TAG app/cast-service/
+                """
             }
         }
 
         stage('Push Images') {
             steps {
-                sh 'echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin'
-                sh 'docker push $IMAGE_MOVIE:${BUILD_NUMBER}'
-                sh 'docker push $IMAGE_CAST:${BUILD_NUMBER}'
+                sh """
+                echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
+                docker push $IMAGE_MOVIE:$IMAGE_TAG
+                docker push $IMAGE_CAST:$IMAGE_TAG
+                """
             }
         }
 
         stage('Deploy Dev') {
             steps {
-                sh 'helm upgrade --install app ./app/charts -n dev'
+                sh """
+                helm upgrade --install app ./app/charts \
+                --set movie.image.tag=$IMAGE_TAG \
+                --set cast.image.tag=$IMAGE_TAG \
+                -n dev
+                """
             }
         }
 
@@ -40,8 +50,22 @@ pipeline {
             when { branch 'master' }
             steps {
                 input message: "Deploy to Production?"
-                sh 'helm upgrade --install app ./app/charts -n prod'
+                sh """
+                helm upgrade --install app ./app/charts \
+                --set movie.image.tag=$IMAGE_TAG \
+                --set cast.image.tag=$IMAGE_TAG \
+                -n prod
+                """
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
