@@ -52,6 +52,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./app/charts \
+                    --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
                     -n dev
@@ -64,6 +65,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./app/charts \
+                    --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
                     -n qa
@@ -76,6 +78,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./app/charts \
+                    --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
                     -n staging
@@ -89,6 +92,7 @@ pipeline {
                 input message: "Confirmer le déploiement en PRODUCTION ?"
                 sh """
                     helm upgrade --install app ./app/charts \
+                    --create-namespace \
                     --set movie.image.tag=$IMAGE_TAG \
                     --set cast.image.tag=$IMAGE_TAG \
                     -n prod
