@@ -36,7 +36,9 @@ pipeline {
         }
 
         stage('Deploy Dev') {
+            when { branch 'dev' }
             steps {
+			    input message: "Deploy to Production?"
                 sh """
                 helm upgrade --install app ./app/charts \
                 --set movie.image.tag=$IMAGE_TAG \
@@ -46,18 +48,42 @@ pipeline {
             }
         }
 
-        stage('Deploy Prod') {
-            when { branch 'master' }
-            steps {
-                input message: "Deploy to Production?"
-                sh """
-                helm upgrade --install app ./app/charts \
-                --set movie.image.tag=$IMAGE_TAG \
-                --set cast.image.tag=$IMAGE_TAG \
-                -n prod
-                """
-            }
-        }
+	stage('Deploy QA') {
+		when { branch 'qa' }
+		steps {
+			sh """
+			helm upgrade --install app ./app/charts \
+			--set movie.image.tag=$IMAGE_TAG \
+			--set cast.image.tag=$IMAGE_TAG \
+			-n qa
+			"""
+		}
+	}
+
+	stage('Deploy Staging') {
+		when { branch 'staging' }
+		steps {
+			sh """
+			helm upgrade --install app ./app/charts \
+			--set movie.image.tag=$IMAGE_TAG \
+			--set cast.image.tag=$IMAGE_TAG \
+			-n staging
+			"""
+		}
+	}
+
+	stage('Deploy Prod') {
+		when { branch 'master' }
+		steps {
+			input message: "Deploy to Production?"
+			sh """
+			helm upgrade --install app ./app/charts \
+			--set movie.image.tag=$IMAGE_TAG \
+			--set cast.image.tag=$IMAGE_TAG \
+			-n prod
+			"""
+		}
+	}
     }
 
     post {
