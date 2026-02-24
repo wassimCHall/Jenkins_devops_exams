@@ -1,11 +1,15 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
     environment {
-        DOCKERHUB_CREDS = credentials('DOCKER_HUB_PASS')
-        IMAGE_MOVIE = "welchallch/movie-service"
-        IMAGE_CAST  = "welchallch/cast-service"
-        IMAGE_TAG   = "1.2"
+        DOCKER_IMAGE_MOVIE = "welchallch/movie-service"
+        DOCKER_IMAGE_CAST  = "welchallch/cast-service"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -16,82 +20,91 @@ pipeline {
             }
         }
 
-        stage('Build Images') {
+        stage('Build Docker Images') {
             steps {
                 sh """
-                docker build -t $IMAGE_MOVIE:$IMAGE_TAG movie-service/
-                docker build -t $IMAGE_CAST:$IMAGE_TAG cast-service/
+                    docker build -t $DOCKER_IMAGE_MOVIE:$IMAGE_TAG movie-service/
+                    docker build -t $DOCKER_IMAGE_CAST:$IMAGE_TAG cast-service/
                 """
             }
         }
 
-        stage('Push Images') {
+        stage('Push Docker Images') {
             steps {
-                sh """
-                echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
-                docker push $IMAGE_MOVIE:$IMAGE_TAG
-                docker push $IMAGE_CAST:$IMAGE_TAG
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'DOCKER_PASS',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $DOCKER_IMAGE_MOVIE:$IMAGE_TAG
+                        docker push $DOCKER_IMAGE_CAST:$IMAGE_TAG
+                        docker logout
+                    """
+                }
             }
         }
 
         stage('Deploy Dev') {
             when { branch 'dev' }
             steps {
-			    input message: "Deploy to Production?"
                 sh """
-                helm upgrade --install app ./app/charts \
-                --set movie.image.tag=$IMAGE_TAG \
-                --set cast.image.tag=$IMAGE_TAG \
-                -n dev
+                    helm upgrade --install app ./app/charts \
+                    --set movie.image.tag=$IMAGE_TAG \
+                    --set cast.image.tag=$IMAGE_TAG \
+                    -n dev
                 """
             }
         }
 
-	stage('Deploy QA') {
-		when { branch 'qa' }
-		steps {
-			sh """
-			helm upgrade --install app ./app/charts \
-			--set movie.image.tag=$IMAGE_TAG \
-			--set cast.image.tag=$IMAGE_TAG \
-			-n qa
-			"""
-		}
-	}
+        stage('Deploy QA') {
+            when { branch 'qa' }
+            steps {
+                sh """
+                    helm upgrade --install app ./app/charts \
+                    --set movie.image.tag=$IMAGE_TAG \
+                    --set cast.image.tag=$IMAGE_TAG \
+                    -n qa
+                """
+            }
+        }
 
-	stage('Deploy Staging') {
-		when { branch 'staging' }
-		steps {
-			sh """
-			helm upgrade --install app ./app/charts \
-			--set movie.image.tag=$IMAGE_TAG \
-			--set cast.image.tag=$IMAGE_TAG \
-			-n staging
-			"""
-		}
-	}
+        stage('Deploy Staging') {
+            when { branch 'staging' }
+            steps {
+                sh """
+                    helm upgrade --install app ./app/charts \
+                    --set movie.image.tag=$IMAGE_TAG \
+                    --set cast.image.tag=$IMAGE_TAG \
+                    -n staging
+                """
+            }
+        }
 
-	stage('Deploy Prod') {
-		when { branch 'master' }
-		steps {
-			input message: "Deploy to Production?"
-			sh """
-			helm upgrade --install app ./app/charts \
-			--set movie.image.tag=$IMAGE_TAG \
-			--set cast.image.tag=$IMAGE_TAG \
-			-n prod
-			"""
-		}
-	}
+        stage('Deploy Production') {
+            when { branch 'master' }
+            steps {
+                input message: "Confirmer le déploiement en PRODUCTION ?"
+                sh """
+                    helm upgrade --install app ./app/charts \
+                    --set movie.image.tag=$IMAGE_TAG \
+                    --set cast.image.tag=$IMAGE_TAG \
+                    -n prod
+                """
+            }
+        }
     }
 
     post {
+        always {
+            cleanWs()
+        }
         success {
-            echo 'Pipeline executed successfully'
+            echo "Pipeline exécuté avec succès"
         }
         failure {
-            echo 'Pipeline failed'
+            echo "Pipeline échoué"
         }
     }
 }
