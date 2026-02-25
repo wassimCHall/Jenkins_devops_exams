@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 movie:
   image:
@@ -21,12 +21,20 @@ postgresql:
     #tag: latest
   auth:
     username: appuser
+    password: AppPassword123
     database: appdb
-    existingSecret: app-postgres-secret
+    #existingSecret: app-postgres-secret
   primary:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
     persistence:
-      enabled: true
-      size: 1Gi
+      enabled: false
+      #size: 1Gi
 
 ingress:
   enabled: true

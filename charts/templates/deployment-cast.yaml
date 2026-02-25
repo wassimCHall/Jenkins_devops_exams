@@ -19,14 +19,14 @@ spec:
             - containerPort: 8000
           resources:
             requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
               cpu: "100m"
               memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
           env:
             - name: DATABASE_URI
-              value: "postgresql://appuser:GE4eSstlklbpgDRXDWl2@app-postgresql.{{ .Release.Namespace }}/appdb"
+              value: "postgresql://appuser:AppPassword123@app-postgresql.{{ .Release.Namespace }}/appdb"
               #value: postgresql://appuser:${DB_PASSWORD}@{{ .Release.Name }}-postgresql/appdb
             #- name: DB_PASSWORD
               #valueFrom:
