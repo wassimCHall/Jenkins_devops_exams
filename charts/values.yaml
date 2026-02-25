@@ -14,11 +14,11 @@ service:
   type: ClusterIP
   port: 8000
 
-postgres:
-  image:
-    registry: docker.io
-    repository: bitnami/postgresql
-    tag: 15
+postgresql:
+  #image:
+    #registry: docker.io
+    #repository: bitnami/postgresql
+    #tag: 15
   auth:
     username: appuser
     database: appdb
