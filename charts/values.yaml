@@ -15,7 +15,7 @@ service:
   port: 8000
 
 postgres:
- auth:
+  auth:
     username: appuser
     database: appdb
     existingSecret: app-postgres-secret
