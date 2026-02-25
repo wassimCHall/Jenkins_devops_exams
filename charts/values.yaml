@@ -16,9 +16,9 @@ service:
 
 postgresql:
   image:
-    registry: docker.io
-    repository: bitnami/postgresql
-    tag: 15.5.19-debian-11-r0
+    #registry: docker.io
+    #repository: bitnami/postgresql
+    tag: latest
   auth:
     username: appuser
     database: appdb
