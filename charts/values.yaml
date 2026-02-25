@@ -15,10 +15,18 @@ service:
   port: 8000
 
 postgres:
-  host: postgres.dev.svc.cluster.local
-  port: "5432"
-  db: appdb
-  user: postgres
+ auth:
+    username: appuser
+    database: appdb
+    existingSecret: app-postgres-secret
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+ #host: postgres.dev.svc.cluster.local
+ # port: "5432"
+ # db: appdb
+ # user: postgres
 
 ingress:
   enabled: true
