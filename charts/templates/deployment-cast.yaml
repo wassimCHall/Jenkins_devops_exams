@@ -26,7 +26,8 @@ spec:
               memory: "256Mi"
           env:
             - name: DATABASE_URI
-              value: postgresql://appuser:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/appdb
+              value: "postgresql://appuser:GE4eSstlklbpgDRXDWl2@app-postgresql.dev.svc.cluster.local/appdb"
+              #value: postgresql://appuser:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/appdb
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
