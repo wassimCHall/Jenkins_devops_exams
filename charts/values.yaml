@@ -15,10 +15,10 @@ service:
   port: 8000
 
 postgresql:
-  image:
+  #image:
     #registry: docker.io
     #repository: bitnami/postgresql
-    tag: latest
+    #tag: latest
   auth:
     username: appuser
     database: appdb
@@ -27,10 +27,6 @@ postgresql:
     persistence:
       enabled: true
       size: 1Gi
- #host: postgres.dev.svc.cluster.local
- # port: "5432"
- # db: appdb
- # user: postgres
 
 ingress:
   enabled: true
